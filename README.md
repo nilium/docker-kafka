@@ -1,85 +1,107 @@
 Kafka in Docker
 ===
 
-This repository provides everything you need to run Kafka in Docker.
+This is a fork of Spotify's Kafka in Docker container. Unlike Spotify's, it does
+not include Zookeeper in-container, as this is intended for testing use in
+Kubernetes (where it's relatively easy to bring up a separate Zookeeper pod and
+services).
 
-For convenience also contains a packaged proxy that can be used to get data from
-a legacy Kafka 7 cluster into a dockerized Kafka 8.
+The kafkaproxy has been removed from this fork. You should use Spotify's
+container or repository for that.
 
 Why?
 ---
-The main hurdle of running Kafka in Docker is that it depends on Zookeeper.
-Compared to other Kafka docker images, this one runs both Zookeeper and Kafka
-in the same container. This means:
-
-* No dependency on an external Zookeeper host, or linking to another container
-* Zookeeper and Kafka are configured to work together out of the box
+There are no library Docker images for Kafka and I trust Spotify more than most
+random Docker Hub users to have a usable base.
 
 Run
 ---
 
 ```bash
-docker run -p 2181:2181 -p 9092:9092 --env ADVERTISED_HOST=`docker-machine ip \`docker-machine active\`` --env ADVERTISED_PORT=9092 spotify/kafka
+docker run -p 127.0.0.1:9092:9092 \
+  -e KAFKA_ADV_ADDR=localhost \
+  -e KAFKA_ZK_CONNECT=zookeeper:2181 \
+  spiffastic/kafka
 ```
 
-```bash
-export KAFKA=`docker-machine ip \`docker-machine active\``:9092
-kafka-console-producer.sh --broker-list $KAFKA --topic test
-```
+Environment Variables
+---
 
-```bash
-export ZOOKEEPER=`docker-machine ip \`docker-machine active\``:2181
-kafka-console-consumer.sh --zookeeper $ZOOKEEPER --topic test
-```
+- `KAFKA_BROKER_ID = 0`  
+    The broker ID.
 
-Running the proxy
------------------
+The following variables can be used to configure kafka in the absence of
+a complete listeners list.
 
-Take the same parameters as the spotify/kafka image with some new ones:
- * `CONSUMER_THREADS` - the number of threads to consume the source kafka 7 with
- * `TOPICS` - whitelist of topics to mirror
- * `ZK_CONNECT` - the zookeeper connect string of the source kafka 7
- * `GROUP_ID` - the group.id to use when consuming from kafka 7
+- `KAFKA_ADDR = ''`
+- `KAFKA_PORT = 9092`
+- `KAFKA_PROTOCOL = PLAINTEXT`
+- `KAFKA_ADV_PROTOCOL = ${KAFKA_PROTOCOL}`
+- `KAFKA_ADV_ADDR = $(hostname -f)`
+- `KAFKA_ADV_PORT = ${KAFKA_PORT}`
 
-```bash
-docker run -p 2181:2181 -p 9092:9092 \
-    --env ADVERTISED_HOST=`boot2docker ip` \
-    --env ADVERTISED_PORT=9092 \
-    --env CONSUMER_THREADS=1 \
-    --env TOPICS=my-topic,some-other-topic \
-    --env ZK_CONNECT=kafka7zookeeper:2181/root/path \
-    --env GROUP_ID=mymirror \
-    spotify/kafkaproxy
-```
+Otherwise, you can set the following variables yourself and not generate them
+from the above few.
+
+- `KAFKA_LISTENERS = ${KAFKA_PROTOCOL}://${KAFKA_ADDR}:${KAFKA_PORT}`  
+- `KAFKA_ADV_LISTENERS = ${KAFKA_PROTOCOL}://${KAFKA_ADV_ADDR}:${KAFKA_ADV_PORT}`
+
+- `KAFKA_AUTO_CREATE_TOPICS = true`  
+    Whether to automatically create topics upon use. (`true` or `false`)
+
+The following variables control the Zookeeper connection:
+
+- `KAFKA_ZK_CONNECT = localhost:2181`  
+	KAFKA_ZK_CONNECT accepts a comma-separated list of Zookeeper addresses to
+	connect to.
+- `KAFKA_ZK_TIMEOUT = 6000`
+
+And additional variables to tweak the generated server.properties:
+
+- `KAFKA_COMPRESSION = uncompressed`
+- `KAFKA_NW_THREADS = 3`
+- `KAFKA_IO_THREADS = 8`
+- `KAFKA_PARTITIONS = 8`
+- `KAFKA_SEND_BUFFER = 102400`
+- `KAFKA_RECV_BUFFER = 102400`
+- `KAFKA_SOCK_MAXBYTES = 104857600`
+- `KAFKA_RECOV_THREADS = 1`
+- `KAFKA_OFFSET_REPL_FACTOR = 1`
+- `KAFKA_TX_LOG_REPL_FACTOR = 1`
+- `KAFKA_TX_LOG_MIN_ISR = 1`
+- `KAFKA_LOG_DIR = /data`
+- `KAFKA_LOG_FLUSH_INTERVAL_MSGS = 10000`
+- `KAFKA_LOG_FLUSH_INTERVAL_MS = 1000`
+- `KAFKA_LOG_RETENTION_HR = 168`
+- `KAFKA_LOG_RETENTION_BYTES = 1073741824`
+- `KAFKA_LOG_SEGMENT_BYTES = 1073741824`
+- `KAFKA_LOG_RETENTION_CHECK_MS = 300000`
+
+If you provide a server.properties in the container (by bind mounting one, such
+as with a ConfigMap in Kubernetes), these variables have no effect.
 
 In the box
 ---
-* **spotify/kafka**
+* **spiffastic/kafka**
 
-  The docker image with both Kafka and Zookeeper. Built from the `kafka`
-  directory.
-
-* **spotify/kafkaproxy**
-
-  The docker image with Kafka, Zookeeper and a Kafka 7 proxy that can be
-  configured with a set of topics to mirror.
+  A docker image containing Kafka.
 
 Public Builds
 ---
 
-https://registry.hub.docker.com/u/spotify/kafka/
-
-https://registry.hub.docker.com/u/spotify/kafkaproxy/
+https://registry.hub.docker.com/u/spiffastic/kafka/
 
 Build from Source
 ---
 
-    docker build -t spotify/kafka kafka/
-    docker build -t spotify/kafkaproxy kafkaproxy/
+```bash
+docker build -t spifftastic/kafka kafka
+```
 
 Todo
 ---
 
 * Not particularily optimzed for startup time.
 * Better docs
+* TODO that's relevant to this image instead of its source repository.
 

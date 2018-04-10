@@ -33,9 +33,9 @@ Environment Variables
 The following variables can be used to configure kafka in the absence of
 a complete listeners list.
 
-- `KAFKA_ADDR = ''`
-- `KAFKA_PORT = 9092`
-- `KAFKA_PROTOCOL = PLAINTEXT`
+- `KAFKA_LISTEN_ADDR = ''`
+- `KAFKA_LISTEN_PORT = 9092`
+- `KAFKA_LISTEN_PROTOCOL = PLAINTEXT`
 - `KAFKA_ADV_PROTOCOL = ${KAFKA_PROTOCOL}`
 - `KAFKA_ADV_ADDR = $(hostname -f)`
 - `KAFKA_ADV_PORT = ${KAFKA_PORT}`

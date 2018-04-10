@@ -3,13 +3,13 @@
 : ${KAFKA_BROKER_ID:=0}
 
 # The following variables can be used to configure kafka in the absence of a complete LISTENERS list.
-: ${KAFKA_PORT:=9092}
-: ${KAFKA_PROTOCOL:=PLAINTEXT}
-: ${KAFKA_ADV_PORT:=${KAFKA_PORT}}
+: ${KAFKA_LISTEN_PORT:=9092}
+: ${KAFKA_LISTEN_PROTOCOL:=PLAINTEXT}
+: ${KAFKA_ADV_PORT:=${KAFKA_LISTEN_PORT}}
 : ${KAFKA_ADV_ADDR:=$(hostname -f)}
 
 # Listeners
-: ${KAFKA_LISTENERS:=${KAFKA_PROTOCOL}://${KAFKA_ADDR}:${KAFKA_PORT}}
+: ${KAFKA_LISTENERS:=${KAFKA_LISTEN_PROTOCOL}://${KAFKA_LISTEN_ADDR}:${KAFKA_LISTEN_PORT}}
 : ${KAFKA_ADV_LISTENERS:=${KAFKA_PROTOCOL}://${KAFKA_ADV_ADDR}:${KAFKA_ADV_PORT}}
 
 # Whether to automatically create topics on use

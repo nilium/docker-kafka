@@ -27,6 +27,11 @@ docker run -p 127.0.0.1:9092:9092 \
 Environment Variables
 ---
 
+- `KAFKA_SERVER_CONFIG = /opt/kafka/config/server.properties`
+    The location of the Kafka server.properties file. If a file at this location
+    already exists, it is used instead of generating a config from the following
+    variables.
+
 - `KAFKA_BROKER_ID = 0`  
     The broker ID.
 
@@ -52,8 +57,8 @@ from the above few.
 The following variables control the Zookeeper connection:
 
 - `KAFKA_ZK_CONNECT = localhost:2181`  
-	KAFKA_ZK_CONNECT accepts a comma-separated list of Zookeeper addresses to
-	connect to.
+    KAFKA_ZK_CONNECT accepts a comma-separated list of Zookeeper addresses to
+    connect to.
 - `KAFKA_ZK_TIMEOUT = 6000`
 
 And additional variables to tweak the generated server.properties:
@@ -76,6 +81,12 @@ And additional variables to tweak the generated server.properties:
 - `KAFKA_LOG_RETENTION_BYTES = 1073741824`
 - `KAFKA_LOG_SEGMENT_BYTES = 1073741824`
 - `KAFKA_LOG_RETENTION_CHECK_MS = 300000`
+
+And, to configure any additional properties not covered here:
+
+- `KAFKA_SERVER_PROPERTIES = ''`  
+    A variable containing any additional config properties to include at the end
+    of the server.properties file.
 
 If you provide a server.properties in the container (by bind mounting one, such
 as with a ConfigMap in Kubernetes), these variables have no effect.

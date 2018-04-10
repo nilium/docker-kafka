@@ -73,4 +73,5 @@ log.segment.bytes=${KAFKA_LOG_SEGMENT_BYTES}
 log.retention.check.interval.ms=${KAFKA_LOG_RETENTION_CHECK_MS}
 zookeeper.connect=${KAFKA_ZK_CONNECT}
 zookeeper.connection.timeout.ms=${KAFKA_ZK_TIMEOUT}
+${KAFKA_SERVER_PROPERTIES}
 EOF
